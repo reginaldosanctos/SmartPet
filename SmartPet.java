@@ -407,40 +407,108 @@ public class SmartPet {
         }
     }
 
-    // Metodos de Consulta para consultarCliente
     private static void consultarCliente(Connection conn) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("CPF do Cliente para consulta: ");
-            String cpf = scanner.next();
+            System.out.print("CPF do Cliente para consulta ou 'todos' para exibir todos: ");
+            String cpf = scanner.next(); // Lê o CPF do cliente ou a palavra 'todos'
 
-            String sql = "SELECT * FROM Cliente WHERE cpf_cliente = ?";
+            String sql;
+            boolean isAll = cpf.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Cliente"; // Consulta para exibir todos os clientes
+            } else {
+                sql = "SELECT * FROM Cliente WHERE cpf_cliente = ?"; // Consulta para exibir um cliente específico
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, cpf);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
+                // Define o parâmetro do CPF do cliente se não for para exibir todos
+                if (!isAll) {
+                    stmt.setString(1, cpf);
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada cliente encontrado
+                if (isAll) {
+                    while (rs.next()) {
+                        System.out.println("Nome: " + rs.getString("nome_cliente"));
+                        System.out.println("CPF: " + rs.getString("cpf_cliente"));
+                        System.out.println("Email: " + rs.getString("email_cliente"));
+                        System.out.println("Telefone: " + rs.getString("telefone_cliente"));
+                        System.out.println("-------------------------"); // Separador entre clientes
+                    }
+                } else if (rs.next()) {
                     System.out.println("Nome: " + rs.getString("nome_cliente"));
                     System.out.println("Email: " + rs.getString("email_cliente"));
                     System.out.println("Telefone: " + rs.getString("telefone_cliente"));
                 } else {
                     System.out.println("Cliente não encontrado.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarPet
     private static void consultarPet(Connection conn) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Matrícula do Pet para consulta: ");
-            int matriculaPet = scanner.nextInt();
+            System.out.print("Matrícula do Pet para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê a matrícula do pet ou a palavra 'todos'
 
-            String sql = "SELECT * FROM Pet WHERE matricula_pet = ?";
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Pet"; // Consulta para exibir todos os pets
+            } else {
+                sql = "SELECT * FROM Pet WHERE matricula_pet = ?"; // Consulta para exibir um pet específico
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, matriculaPet);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
+                // Define o parâmetro da matrícula do pet se não for para exibir todos
+                if (!isAll) {
+                    int matriculaPet = Integer.parseInt(input); // Converte a entrada para inteiro
+                    stmt.setInt(1, matriculaPet);
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada pet encontrado
+                if (isAll) {
+                    while (rs.next()) {
+                        System.out.println("Nome do Pet: " + rs.getString("nome_pet"));
+                        System.out.println("Matrícula do Pet: " + rs.getInt("matricula_pet"));
+                        System.out.println("CPF do Dono: " + rs.getString("cpf_cliente"));
+                        System.out.println("ID da Raça: " + rs.getString("id_raca"));
+                        System.out.println("Comprimento: " + rs.getDouble("comprimento_pet"));
+                        System.out.println("Peso: " + rs.getDouble("peso_pet"));
+                        System.out.println("Sexo: " + rs.getString("sexo_pet"));
+                        System.out.println("-------------------------"); // Separador entre pets
+                    }
+                } else if (rs.next()) {
                     System.out.println("Nome do Pet: " + rs.getString("nome_pet"));
                     System.out.println("CPF do Dono: " + rs.getString("cpf_cliente"));
                     System.out.println("ID da Raça: " + rs.getString("id_raca"));
@@ -450,226 +518,741 @@ public class SmartPet {
                 } else {
                     System.out.println("Pet não encontrado.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarAtendente
     private static void consultarAtendente(Connection conn) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Matrícula do Atendente para consulta: ");
-            int matricula = scanner.nextInt();
+            System.out.print("Matrícula do Atendente para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê a matrícula do atendente ou a palavra 'todos'
 
-            String sql = "SELECT * FROM Atendente WHERE matricula_atendente = ?";
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Atendente"; // Consulta para exibir todos os atendentes
+            } else {
+                sql = "SELECT * FROM Atendente WHERE matricula_atendente = ?"; // Consulta para exibir um atendente específico
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, matricula);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
+                // Define o parâmetro da matrícula do atendente se não for para exibir todos
+                if (!isAll) {
+                    int matricula = Integer.parseInt(input); // Converte a entrada para inteiro
+                    stmt.setInt(1, matricula);
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada atendente encontrado
+                if (isAll) {
+                    while (rs.next()) {
+                        System.out.println("Nome: " + rs.getString("nome_atendente"));
+                        System.out.println("Matrícula: " + rs.getInt("matricula_atendente"));
+                        System.out.println("Data de Admissão: " + rs.getDate("admissao_atendente"));
+                        System.out.println("-------------------------"); // Separador entre atendentes
+                    }
+                } else if (rs.next()) {
                     System.out.println("Nome: " + rs.getString("nome_atendente"));
                     System.out.println("Data de Admissão: " + rs.getDate("admissao_atendente"));
                 } else {
                     System.out.println("Atendente não encontrado.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
-    // Metodos de Consulta para consultarRaca
-    private static void consultarRaca(Connection conn) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("ID da Raça para consulta: ");
-            String id = scanner.next();
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
 
-            String sql = "SELECT * FROM Raca WHERE id_raca = ?";
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, id);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    System.out.println("Nome da Raça: " + rs.getString("nome_raca"));
-                    System.out.println("Espécie: " + rs.getString("especie_raca"));
-                    System.out.println("Porte: " + rs.getString("porte_raca"));
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
                 } else {
-                    System.out.println("Raça não encontrada.");
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
                 }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarEspecialidade
+    private static void consultarRaca(Connection conn) {
+        // Cria um scanner para capturar a entrada do usuário
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID da Raça para consulta ou 'todas' para exibir todas: ");
+            String id = scanner.next(); // Lê o ID da raça ou a palavra 'todas'
+
+            // Define a consulta SQL com base na entrada do usuário
+            String sql;
+            boolean isAll = id.equalsIgnoreCase("todas"); // Verifica se o usuário digitou 'todas'
+
+            if (isAll) {
+                sql = "SELECT * FROM Raca"; // Consulta para exibir todas as raças
+            } else {
+                sql = "SELECT * FROM Raca WHERE id_raca = ?"; // Consulta para exibir uma raça específica
+            }
+
+            // Prepara e executa a consulta SQL em um bloco try separado
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID da raça se não for para exibir todas
+                if (!isAll) {
+                    stmt.setString(1, id);
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada raça encontrada
+                if (rs.next()) {
+                    do {
+                        System.out.println("ID da Raça: " + rs.getString("id_raca"));
+                        System.out.println("Nome da Raça: " + rs.getString("nome_raca"));
+                        System.out.println("Espécie: " + rs.getString("especie_raca"));
+                        System.out.println("Porte: " + rs.getString("porte_raca"));
+                        System.out.println("-------------------------"); // Separador entre raças
+                    } while (rs.next()); // Continua exibindo até o último registro
+                } else {
+                    // Exibe uma mensagem apropriada se nenhuma raça for encontrada
+                    System.out.println(isAll ? "Nenhuma raça cadastrada." : "Raça não encontrada.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
+        }
+    }
+
+
     private static void consultarEspecialidade(Connection conn) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("ID da Especialidade para consulta: ");
-            String id = scanner.next();
+            System.out.print("ID da Especialidade para consulta ou 'todas' para exibir todas: ");
+            String input = scanner.next(); // Lê o ID da especialidade ou a palavra 'todas'
 
-            String sql = "SELECT * FROM Especialidade WHERE id_especialidade = ?";
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todas"); // Verifica se o usuário digitou 'todas'
+
+            if (isAll) {
+                sql = "SELECT * FROM Especialidade"; // Consulta para exibir todas as especialidades
+            } else {
+                sql = "SELECT * FROM Especialidade WHERE id_especialidade = ?"; // Consulta para exibir uma especialidade específica
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, id);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
+                // Define o parâmetro do ID da especialidade se não for para exibir todas
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada especialidade encontrada
+                if (isAll) {
+                    while (rs.next()) {
+                        System.out.println("ID da Especialidade: " + rs.getString("id_especialidade"));
+                        System.out.println("Descrição da Especialidade: " + rs.getString("descricao_especialidade"));
+                        System.out.println("Tipo: " + rs.getString("tipo_especialidade"));
+                        System.out.println("-------------------------"); // Separador entre especialidades
+                    }
+                } else if (rs.next()) {
                     System.out.println("Descrição da Especialidade: " + rs.getString("descricao_especialidade"));
                     System.out.println("Tipo: " + rs.getString("tipo_especialidade"));
                 } else {
                     System.out.println("Especialidade não encontrada.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarEspecialista
     private static void consultarEspecialista(Connection conn) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Matrícula do Especialista para consulta: ");
-            String matricula = scanner.next();
+            System.out.print("Matrícula do Especialista para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê a matrícula do especialista ou a palavra 'todos'
 
-            String sql = "SELECT * FROM Especialista WHERE matricula_especialista = ?";
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Especialista"; // Consulta para exibir todos os especialistas
+            } else {
+                sql = "SELECT * FROM Especialista WHERE matricula_especialista = ?"; // Consulta para exibir um especialista específico
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, matricula);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
+                // Define o parâmetro da matrícula do especialista se não for para exibir todos
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada especialista encontrado
+                if (isAll) {
+                    while (rs.next()) {
+                        System.out.println("Nome: " + rs.getString("nome_especialista"));
+                        System.out.println("Matrícula: " + rs.getString("matricula_especialista"));
+                        System.out.println("ID Especialidade: " + rs.getString("id_especialidade"));
+                        System.out.println("Data de Admissão: " + rs.getDate("admissao_especialista"));
+                        System.out.println("-------------------------"); // Separador entre especialistas
+                    }
+                } else if (rs.next()) {
                     System.out.println("Nome: " + rs.getString("nome_especialista"));
                     System.out.println("ID Especialidade: " + rs.getString("id_especialidade"));
                     System.out.println("Data de Admissão: " + rs.getDate("admissao_especialista"));
                 } else {
                     System.out.println("Especialista não encontrado.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarVeterinario
     private static void consultarVeterinario(Connection conn) {
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("ID do Veterinário para consulta: ");
-            int id = scanner.nextInt();
+            System.out.print("ID do Veterinário para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê o ID do veterinário ou a palavra 'todos'
 
-            String sql = "SELECT * FROM Veterinario WHERE id_veterinario = ?";
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Veterinario"; // Consulta para exibir todos os veterinários
+            } else {
+                sql = "SELECT * FROM Veterinario WHERE id_veterinario = ?"; // Consulta para exibir um veterinário específico
+            }
+
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, id);
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
+                // Define o parâmetro do ID do veterinário se não for para exibir todos
+                if (!isAll) {
+                    stmt.setInt(1, Integer.parseInt(input)); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada veterinário encontrado
+                if (isAll) {
+                    while (rs.next()) {
+                        System.out.println("ID do Veterinário: " + rs.getInt("id_veterinario"));
+                        System.out.println("Matrícula do Especialista: " + rs.getString("matricula_especialista"));
+                        System.out.println("CRMV: " + rs.getString("CRMV"));
+                        System.out.println("-------------------------"); // Separador entre veterinários
+                    }
+                } else if (rs.next()) {
                     System.out.println("Matrícula do Especialista: " + rs.getString("matricula_especialista"));
                     System.out.println("CRMV: " + rs.getString("CRMV"));
                 } else {
                     System.out.println("Veterinário não encontrado.");
                 }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarCategoriaItem
     private static void consultarCategoriaItem(Connection conn) {
-        try {
-            String sql = "SELECT * FROM CategoriaItem";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID da Categoria de Item para consulta ou 'todas' para exibir todas: ");
+            String input = scanner.next(); // Lê o ID da categoria ou a palavra 'todas'
 
-            System.out.println("Categorias de Itens:");
-            while (rs.next()) {
-                System.out.printf("ID: %s, Descrição: %s, Tipo: %s%n",
-                        rs.getString("id_categoria"), rs.getString("descricao_categoria"), rs.getString("tipo_categoria"));
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todas"); // Verifica se o usuário digitou 'todas'
+
+            if (isAll) {
+                sql = "SELECT * FROM CategoriaItem"; // Consulta para exibir todas as categorias
+            } else {
+                sql = "SELECT * FROM CategoriaItem WHERE id_categoria = ?"; // Consulta para exibir uma categoria específica
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID da categoria se não for para exibir todas
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada categoria encontrada
+                if (isAll) {
+                    System.out.println("Categorias de Itens:");
+                    while (rs.next()) {
+                        System.out.printf("ID: %s, Descrição: %s, Tipo: %s%n",
+                                rs.getString("id_categoria"), rs.getString("descricao_categoria"), rs.getString("tipo_categoria"));
+                    }
+                } else if (rs.next()) {
+                    System.out.printf("ID: %s, Descrição: %s, Tipo: %s%n",
+                            rs.getString("id_categoria"), rs.getString("descricao_categoria"), rs.getString("tipo_categoria"));
+                } else {
+                    System.out.println("Categoria não encontrada.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarItem
     private static void consultarItem(Connection conn) {
-        try {
-            String sql = "SELECT * FROM Item";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID do Item para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê o ID do item ou a palavra 'todos'
 
-            System.out.println("Itens:");
-            while (rs.next()) {
-                System.out.printf("ID: %s, Categoria: %s, Nome: %s, Custo: %.2f%n",
-                        rs.getString("id_item"), rs.getString("id_categoria"), rs.getString("nome_item"), rs.getDouble("custo_item"));
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Item"; // Consulta para exibir todos os itens
+            } else {
+                sql = "SELECT * FROM Item WHERE id_item = ?"; // Consulta para exibir um item específico
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID do item se não for para exibir todos
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada item encontrado
+                if (isAll) {
+                    System.out.println("Itens:");
+                    while (rs.next()) {
+                        System.out.printf("ID: %s, Categoria: %s, Nome: %s, Custo: %.2f%n",
+                                rs.getString("id_item"), rs.getString("id_categoria"), rs.getString("nome_item"), rs.getDouble("custo_item"));
+                    }
+                } else if (rs.next()) {
+                    System.out.printf("ID: %s, Categoria: %s, Nome: %s, Custo: %.2f%n",
+                            rs.getString("id_item"), rs.getString("id_categoria"), rs.getString("nome_item"), rs.getDouble("custo_item"));
+                } else {
+                    System.out.println("Item não encontrado.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarProduto
     private static void consultarProduto(Connection conn) {
-        try {
-            String sql = "SELECT * FROM Produto";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID do Produto para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê o ID do produto ou a palavra 'todos'
 
-            System.out.println("Produtos:");
-            while (rs.next()) {
-                System.out.printf("ID: %d, ID Item: %s, Quantidade em Estoque: %d%n",
-                        rs.getInt("id_produto"), rs.getString("id_item"), rs.getInt("qtd_estoque"));
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Produto"; // Consulta para exibir todos os produtos
+            } else {
+                sql = "SELECT * FROM Produto WHERE id_produto = ?"; // Consulta para exibir um produto específico
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID do produto se não for para exibir todos
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada produto encontrado
+                if (isAll) {
+                    System.out.println("Produtos:");
+                    while (rs.next()) {
+                        System.out.printf("ID: %d, ID Item: %s, Quantidade em Estoque: %d%n",
+                                rs.getInt("id_produto"), rs.getString("id_item"), rs.getInt("qtd_estoque"));
+                    }
+                } else if (rs.next()) {
+                    System.out.printf("ID: %d, ID Item: %s, Quantidade em Estoque: %d%n",
+                            rs.getInt("id_produto"), rs.getString("id_item"), rs.getInt("qtd_estoque"));
+                } else {
+                    System.out.println("Produto não encontrado.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarServico
     private static void consultarServico(Connection conn) {
-        try {
-            String sql = "SELECT * FROM Servico";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID do Serviço para consulta ou 'todos' para exibir todos: ");
+            String input = scanner.next(); // Lê o ID do serviço ou a palavra 'todos'
 
-            System.out.println("Serviços:");
-            while (rs.next()) {
-                System.out.printf("ID: %d, ID Item: %s, Duração: %s%n",
-                        rs.getInt("id_servico"), rs.getString("id_item"), rs.getTime("duracao_servico"));
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todos"); // Verifica se o usuário digitou 'todos'
+
+            if (isAll) {
+                sql = "SELECT * FROM Servico"; // Consulta para exibir todos os serviços
+            } else {
+                sql = "SELECT * FROM Servico WHERE id_servico = ?"; // Consulta para exibir um serviço específico
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID do serviço se não for para exibir todos
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada serviço encontrado
+                if (isAll) {
+                    System.out.println("Serviços:");
+                    while (rs.next()) {
+                        System.out.printf("ID: %d, ID Item: %s, Duração: %s%n",
+                                rs.getInt("id_servico"), rs.getString("id_item"), rs.getTime("duracao_servico"));
+                    }
+                } else if (rs.next()) {
+                    System.out.printf("ID: %d, ID Item: %s, Duração: %s%n",
+                            rs.getInt("id_servico"), rs.getString("id_item"), rs.getTime("duracao_servico"));
+                } else {
+                    System.out.println("Serviço não encontrado.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarNotaFiscal
     private static void consultarNotaFiscal(Connection conn) {
-        try {
-            String sql = "SELECT * FROM NotaFiscal";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID da Nota Fiscal para consulta ou 'todas' para exibir todas: ");
+            String input = scanner.next(); // Lê o ID da nota fiscal ou a palavra 'todas'
 
-            System.out.println("Notas Fiscais:");
-            while (rs.next()) {
-                System.out.printf("ID: %s, CPF Cliente: %s, Matricula Atendente: %d, Data: %s, Hora: %s, Tipo: %s%n",
-                        rs.getString("id_notaFiscal"), rs.getString("cpf_cliente"), rs.getInt("matricula_atendente"),
-                        rs.getDate("data_notaFiscal"), rs.getTime("hora_notaFiscal"), rs.getString("tipo_notaFiscal"));
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todas"); // Verifica se o usuário digitou 'todas'
+
+            if (isAll) {
+                sql = "SELECT * FROM NotaFiscal"; // Consulta para exibir todas as notas fiscais
+            } else {
+                sql = "SELECT * FROM NotaFiscal WHERE id_notaFiscal = ?"; // Consulta para exibir uma nota fiscal específica
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID da nota fiscal se não for para exibir todas
+                if (!isAll) {
+                    stmt.setString(1, input); // Usa a entrada do usuário como parâmetro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada nota fiscal encontrada
+                if (isAll) {
+                    System.out.println("Notas Fiscais:");
+                    while (rs.next()) {
+                        System.out.printf("ID: %s, CPF Cliente: %s, Matricula Atendente: %d, Data: %s, Hora: %s, Tipo: %s%n",
+                                rs.getString("id_notaFiscal"), rs.getString("cpf_cliente"), rs.getInt("matricula_atendente"),
+                                rs.getDate("data_notaFiscal"), rs.getTime("hora_notaFiscal"), rs.getString("tipo_notaFiscal"));
+                    }
+                } else if (rs.next()) {
+                    System.out.printf("ID: %s, CPF Cliente: %s, Matricula Atendente: %d, Data: %s, Hora: %s, Tipo: %s%n",
+                            rs.getString("id_notaFiscal"), rs.getString("cpf_cliente"), rs.getInt("matricula_atendente"),
+                            rs.getDate("data_notaFiscal"), rs.getTime("hora_notaFiscal"), rs.getString("tipo_notaFiscal"));
+                } else {
+                    System.out.println("Nota Fiscal não encontrada.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
-    // Metodos de Consulta para consultarAtendimento
     private static void consultarAtendimento(Connection conn) {
-        try {
-            String sql = "SELECT * FROM Atendimento";
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("ID do Atendimento para consulta ou 'todas' para exibir todos: ");
+            String input = scanner.next(); // Lê o ID do atendimento ou a palavra 'todas'
 
-            System.out.println("Atendimentos:");
-            while (rs.next()) {
-                System.out.printf("ID: %d, Matrícula Especialista: %s, Matrícula Pet: %d, ID Serviço: %d, CPF Cliente: %s, Data Marcação: %s, Data Atendimento: %s, Hora Atendimento: %s%n",
-                        rs.getInt("id_atendimento"), rs.getString("matricula_especialista"), rs.getInt("matricula_pet"),
-                        rs.getInt("id_servico"), rs.getString("cpf_cliente"), rs.getDate("data_marcacao"),
-                        rs.getDate("data_atendimento"), rs.getTime("hora_atendimento"));
+            String sql;
+            boolean isAll = input.equalsIgnoreCase("todas"); // Verifica se o usuário digitou 'todas'
+
+            if (isAll) {
+                sql = "SELECT * FROM Atendimento"; // Consulta para exibir todos os atendimentos
+            } else {
+                sql = "SELECT * FROM Atendimento WHERE id_atendimento = ?"; // Consulta para exibir um atendimento específico
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                // Define o parâmetro do ID do atendimento se não for para exibir todos
+                if (!isAll) {
+                    stmt.setInt(1, Integer.parseInt(input)); // Converte a entrada do usuário para inteiro
+                }
+
+                ResultSet rs = stmt.executeQuery(); // Executa a consulta e armazena os resultados
+
+                // Verifica se existem resultados e exibe cada atendimento encontrado
+                if (isAll) {
+                    System.out.println("Atendimentos:");
+                    while (rs.next()) {
+                        System.out.printf("ID: %d, Matrícula Especialista: %s, Matrícula Pet: %d, ID Serviço: %d, CPF Cliente: %s, Data Marcação: %s, Data Atendimento: %s, Hora Atendimento: %s%n",
+                                rs.getInt("id_atendimento"), rs.getString("matricula_especialista"), rs.getInt("matricula_pet"),
+                                rs.getInt("id_servico"), rs.getString("cpf_cliente"), rs.getDate("data_marcacao"),
+                                rs.getDate("data_atendimento"), rs.getTime("hora_atendimento"));
+                    }
+                } else if (rs.next()) {
+                    System.out.printf("ID: %d, Matrícula Especialista: %s, Matrícula Pet: %d, ID Serviço: %d, CPF Cliente: %s, Data Marcação: %s, Data Atendimento: %s, Hora Atendimento: %s%n",
+                            rs.getInt("id_atendimento"), rs.getString("matricula_especialista"), rs.getInt("matricula_pet"),
+                            rs.getInt("id_servico"), rs.getString("cpf_cliente"), rs.getDate("data_marcacao"),
+                            rs.getDate("data_atendimento"), rs.getTime("hora_atendimento"));
+                } else {
+                    System.out.println("Atendimento não encontrado.");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace(); // Exibe erros SQL, caso ocorram
+            }
+
+            // Opção para voltar ao menu de consultas, ao menu principal ou sair
+            int mainOption;
+            do {
+                System.out.println("\nEscolha uma opção:");
+                System.out.println("1. Voltar ao Menu de Consultas");
+                System.out.println("2. Voltar ao Menu Principal");
+                System.out.println("3. Sair"); // Opção para sair do programa
+                System.out.print("Escolha uma opção: ");
+                mainOption = scanner.nextInt(); // Captura a opção do usuário
+
+                if (mainOption == 1) {
+                    menuConsultas(conn); // Chama o menu de consultas
+                } else if (mainOption == 2) {
+                    return; // Sai do método e volta ao menu principal
+                } else if (mainOption == 3) {
+                    System.out.println("Saindo do programa..."); // Mensagem de saída
+                    System.exit(0); // Encerra o programa
+                } else {
+                    System.out.println("Opção inválida. Tente novamente."); // Mensagem para opção inválida
+                }
+            } while (mainOption < 1 || mainOption > 3); // Repete até uma opção válida ser escolhida
         }
     }
 
